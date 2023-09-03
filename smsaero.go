@@ -62,23 +62,15 @@ func (c *SmsaeroClient) SendMessage(param map[string]string, numbers ...string) 
 
 	smsContent := fmt.Sprintf(c.template, code)
 
-	client := &http.Client{}
-
 	smsaeroMessage, _ := buildSmsaeroMessage(smsContent, c.signature, numbers)
+	fmt.Println(smsaeroMessage)
 	requestBody, err := json.Marshal(smsaeroMessage)
 	fmt.Println(requestBody)
 	if err != nil {
 		return fmt.Errorf("error creating request body: %w", err)
 	}
-
-	req, err := http.NewRequest("POST", c.url+"/sms/send", bytes.NewBuffer(requestBody))
-	if err != nil {
-		return fmt.Errorf("error creating request: %w", err)
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-
-	response, err := client.Do(req)
+	fmt.Println(c.url + "/sms/send")
+	response, err := http.Post(c.url+"/sms/send", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return fmt.Errorf("error sending request: %w", err)
 	}
