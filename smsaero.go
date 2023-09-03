@@ -65,19 +65,14 @@ func (c *SmsaeroClient) SendMessage(param map[string]string, numbers ...string) 
 	smsContent := fmt.Sprintf(c.template, code)
 
 	smsaeroMessage, _ := buildSmsaeroMessage(smsContent, c.signature, numbers)
-	fmt.Println(smsaeroMessage)
 	requestBody, err := json.Marshal(smsaeroMessage)
-	fmt.Println("Тело запроса")
-	fmt.Println(requestBody)
 	if err != nil {
 		return fmt.Errorf("error creating request body: %w", err)
 	}
-	fmt.Println(c.url + "/sms/send")
 	response, err := http.Post(c.url+"/sms/send", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return fmt.Errorf("error sending request: %w", err)
 	}
-	fmt.Println(response)
 
 	response.Body.Close()
 
