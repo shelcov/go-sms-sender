@@ -34,6 +34,7 @@ const (
 	Huyi         = "Huyi SMS"
 	MockSms      = "Mock SMS"
 	Netgsm       = "Netgsm SMS"
+	SMSAero      = "SMSAero"
 )
 
 type SmsClient interface {
@@ -74,6 +75,8 @@ func NewSmsClient(provider string, accessId string, accessKey string, sign strin
 		return GetHuyiClient(accessId, accessKey, template)
 	case Netgsm:
 		return GetNetgsmClient(accessId, accessKey, sign, template)
+	case SMSAero:
+		return GetSmsaeroClient(accessId, accessKey, sign, template)
 	case MockSms:
 		return NewMocker(accessId, accessKey, sign, template, other)
 	default:
