@@ -1,9 +1,7 @@
 package go_sms_sender
 
 import (
-	"bytes"
 	"container/list"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -65,12 +63,10 @@ func (c *SmsaeroClient) SendMessage(param map[string]string, numbers ...string) 
 	client := &http.Client{}
 
 	smsaeroMessage, _ := buildSmsaeroMessage(smsContent, c.signature, numbers)
-	requestBody, err := json.Marshal(smsaeroMessage)
-	if err != nil {
-		return fmt.Errorf("error creating request body: %w", err)
-	}
+	url := fmt.Sprintf(
+		c.url+"/sms/send?numbers=%s&text=%s&sign=%s", smsaeroMessage.numbers, smsaeroMessage.text, smsaeroMessage.sign)
 
-	req, err := http.NewRequest("POST", c.url+"/sms/send", bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
 	}
