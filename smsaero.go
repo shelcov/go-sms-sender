@@ -35,7 +35,7 @@ func GetSmsaeroClient(email string, apikey string, signature string, template st
 
 	smsaeroClient := &SmsaeroClient{
 		signature: signature,
-		channel:   signature,
+		channel:   "PAY SIGN",
 		url:       url,
 		template:  template,
 	}
