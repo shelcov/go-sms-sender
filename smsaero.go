@@ -20,9 +20,9 @@ type SmsaeroClient struct {
 }
 
 type SmsaeroMessage struct {
-	number string
-	sign   string
-	text   string
+	numbers []string
+	sign    string
+	text    string
 }
 
 type SmsaeroResult struct {
@@ -43,51 +43,49 @@ func GetSmsaeroClient(email string, apikey string, signature string, template st
 	return smsaeroClient, nil
 }
 
-func buildSmsaeroMessage(message string, signature string, targetPhoneNumber string) (*SmsaeroMessage, error) {
+func buildSmsaeroMessage(message string, signature string, numbers []string) (*SmsaeroMessage, error) {
 	smsaeroMessage := &SmsaeroMessage{
-		number: targetPhoneNumber,
-		sign:   signature,
-		text:   message,
+		numbers: numbers,
+		sign:    signature,
+		text:    message,
 	}
 	return smsaeroMessage, nil
 }
 
-func (c *SmsaeroClient) SendMessage(param map[string]string, targetPhoneNumber ...string) error {
+func (c *SmsaeroClient) SendMessage(param map[string]string, numbers ...string) error {
 	code, ok := param["code"]
 	if !ok {
 		return fmt.Errorf("missing parameter: msg code")
 	}
-	if len(targetPhoneNumber) < 1 {
+	if len(numbers) < 1 {
 		return fmt.Errorf("missing parameter: targetPhoneNumber")
 	}
 
 	smsContent := fmt.Sprintf(c.template, code)
-	for _, mobile := range targetPhoneNumber {
-		if strings.HasPrefix(mobile, "+") {
-			return fmt.Errorf("unsupported country code")
-		}
-
-		client := &http.Client{}
-
-		smsaeroMessage, _ := buildSmsaeroMessage(smsContent, c.signature, mobile)
-		requestBody, err := json.Marshal(smsaeroMessage)
-		if err != nil {
-			return fmt.Errorf("error creating request body: %w", err)
-		}
-
-		req, err := http.NewRequest("POST", c.url+"/sms/send", bytes.NewBuffer(requestBody))
-		if err != nil {
-			return fmt.Errorf("error creating request: %w", err)
-		}
-
-		req.Header.Add("Content-Type", "application/json")
-
-		response, err := client.Do(req)
-		if err != nil {
-			return fmt.Errorf("error sending request: %w", err)
-		}
-		response.Body.Close()
-
+	if strings.HasPrefix(mobile, "+") {
+		return fmt.Errorf("unsupported country code")
 	}
+
+	client := &http.Client{}
+
+	smsaeroMessage, _ := buildSmsaeroMessage(smsContent, c.signature, numbers)
+	requestBody, err := json.Marshal(smsaeroMessage)
+	if err != nil {
+		return fmt.Errorf("error creating request body: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", c.url+"/sms/send", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return fmt.Errorf("error creating request: %w", err)
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	response, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error sending request: %w", err)
+	}
+	response.Body.Close()
+
 	return nil
 }
