@@ -1,7 +1,9 @@
 package go_sms_sender
 
 import (
+	"bytes"
 	"container/list"
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -33,7 +35,7 @@ func GetSmsaeroClient(email string, apikey string, signature string, template st
 
 	smsaeroClient := &SmsaeroClient{
 		signature: signature,
-		channel:   "PAY SIGN",
+		channel:   "FREE SIGN",
 		url:       url,
 		template:  template,
 	}
@@ -63,10 +65,13 @@ func (c *SmsaeroClient) SendMessage(param map[string]string, numbers ...string) 
 	client := &http.Client{}
 
 	smsaeroMessage, _ := buildSmsaeroMessage(smsContent, c.signature, numbers)
-	url := fmt.Sprintf(
-		c.url+"/sms/send?numbers=%s&text=%s&sign=%s", smsaeroMessage.numbers, smsaeroMessage.text, smsaeroMessage.sign)
+	requestBody, err := json.Marshal(smsaeroMessage)
+	fmt.Println(requestBody)
+	if err != nil {
+		return fmt.Errorf("error creating request body: %w", err)
+	}
 
-	req, err := http.NewRequest("POST", url, nil)
+	req, err := http.NewRequest("POST", c.url+"/sms/send", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
 	}
@@ -77,6 +82,8 @@ func (c *SmsaeroClient) SendMessage(param map[string]string, numbers ...string) 
 	if err != nil {
 		return fmt.Errorf("error sending request: %w", err)
 	}
+	fmt.Println(response)
+
 	response.Body.Close()
 
 	return nil
