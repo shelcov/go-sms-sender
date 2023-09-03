@@ -19,9 +19,10 @@ type SmsaeroClient struct {
 }
 
 type SmsaeroMessage struct {
-	numbers []string
-	sign    string
-	text    string
+	Numbers []string `json:"numbers"`
+	Sign    string   `json:"sign"`
+	Text    string   `json:"text"`
+	Channel string   `json:"channel"`
 }
 
 type SmsaeroResult struct {
@@ -44,9 +45,10 @@ func GetSmsaeroClient(email string, apikey string, signature string, template st
 
 func buildSmsaeroMessage(message string, signature string, numbers []string) (*SmsaeroMessage, error) {
 	smsaeroMessage := &SmsaeroMessage{
-		numbers: numbers,
-		sign:    signature,
-		text:    message,
+		Numbers: numbers,
+		Sign:    signature,
+		Text:    message,
+		Channel: "FREE SIGN",
 	}
 	return smsaeroMessage, nil
 }
@@ -65,6 +67,7 @@ func (c *SmsaeroClient) SendMessage(param map[string]string, numbers ...string) 
 	smsaeroMessage, _ := buildSmsaeroMessage(smsContent, c.signature, numbers)
 	fmt.Println(smsaeroMessage)
 	requestBody, err := json.Marshal(smsaeroMessage)
+	fmt.Println("Тело запроса")
 	fmt.Println(requestBody)
 	if err != nil {
 		return fmt.Errorf("error creating request body: %w", err)
