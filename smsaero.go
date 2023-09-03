@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 // В заголовке указываем accept=application/json
@@ -62,9 +61,6 @@ func (c *SmsaeroClient) SendMessage(param map[string]string, numbers ...string) 
 	}
 
 	smsContent := fmt.Sprintf(c.template, code)
-	if strings.HasPrefix(mobile, "+") {
-		return fmt.Errorf("unsupported country code")
-	}
 
 	client := &http.Client{}
 
